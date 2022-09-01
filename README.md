@@ -19,3 +19,4 @@ Start hive shell using the following command:
 ```bash
 ./start-hive.sh
 ```
+
