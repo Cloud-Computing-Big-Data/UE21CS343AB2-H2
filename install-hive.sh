@@ -26,5 +26,5 @@ jps
 
 hdfs dfs -mkdir -p /root/hive/warehouse
 $HIVE_HOME/bin/schematool -initSchema -dbType derby
-
+cd
 hive
