@@ -1,3 +1,4 @@
+return_to_pwd=$(pwd)
 cd
 if [ -d "hive" ]; then
     echo "Deleting previous hive installation"
@@ -13,18 +14,35 @@ mv apache-hive-3.1.3-bin apache_hive
 
 cd
 export HIVE_HOME=$HOME/hive/apache_hive >> ~/.bashrc
+export PATH=$PATH:$HIVE_HOME/bin >> ~/.bashrc
 source ~/.bashrc
-export PATH=$PATH:$HIVE_HOME/bin
-source ~/.bashrc
 
-hadoop version
+echo 'HIVE_HOME'
+echo $HIVE_HOME
+echo "Do you see something like /home/pes1ug20cs999/hive/apache_hive above?[y/n]"
+read answer
+if [ $answer == "y" ]; then
+    echo "You're good to go. Run ./start-hive.sh to start hive. For now, wait for this process to complete for some post-installation steps."
+else
+    echo "Run source ~/.bashrc and make sure HIVE_HOME is set. Once done, run ./start-hive.sh to start hive. For now, wait for this process to complete for some post-installation steps."
+fi
 
-cd hadoop-3.3.3/sbin/
-./start-all.sh
+jps_count = $(jps | wc -l)
+if [ $jps_count == 1 ]; then
+    echo "Starting Hadoop"
+    $HADOOP_HOME/sbin/start-all.sh
+fi
 
-jps
-
+jps_count = $(jps | wc -l)
+if [ $jps_count < 6 ]; then
+    echo "Hadoop startup failed. Exiting"
+    jps
+    exit 1
+fi
+hdfs dfs -test -d /root/hive/warehouse
+if [ $? == 0 ]; then
+    hdfs dfs -rm -r -f /root*
+fi
 hdfs dfs -mkdir -p /root/hive/warehouse
-$HIVE_HOME/bin/schematool -initSchema -dbType derby
-cd
-hive
+
+cd $return_to_pwd
