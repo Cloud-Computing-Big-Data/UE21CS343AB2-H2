@@ -119,3 +119,72 @@ Create bucketing on country column on top of partitioning by type:
 ```bash
 CREATE TABLE netflix_bucket(title String,director String) PARTITIONED BY(type String) CLUSTERED BY country INTO 10 BUCKETS
 ```
+To check the buckets stored in hadoop data warehouse:
+
+```bash
+cd
+hdfs dfs -ls /user/hive/warehouse/{PATH}
+```
+
+![5a.png](./screenshot/5a.png)
+
+## TASK 2- HQL
+
+### Problem statement : 
+Given two csv files customers.csv and orders.csv, create two tables namely customers and orders using the same structure in the csv file,load the data from csv files to the tables.Perform MapJoin and normal Join operations in hive.
+
+
+Download the dataset "customers.csv" and "orders.csv" provided in the <a href="https://drive.google.com/drive/u/0/folders/1_woAsnz9hY798NE-41LX7owmupoS_1uM" target="_blank">link</a>
+
+### ORDERS
+
+| attribute     | Description                  | DataType  |
+| ------------- |:-------------:               | -----:    |
+| customer_id   | unique values                | int       |
+| order_id      | unique values                | int       |
+| order_date    | order date                   | date      |
+| total_cost    | Total Cost                   | int       |
+
+### CUSTOMERS 
+
+| attribute     | Description                  | DataType  |
+| ------------- |:-------------:               | -----:    |
+| customer_id   | unique values                | int       |
+| initals       | Customer Initials            | String    |
+| street        | Street                       | String    |
+| country       | Country                      | String    |
+
+Similar to Task1 create tables and load data into the created tables.
+
+Let us first understand the functionality of normal join,
+
+Whenever, we apply join operation, the job will be assigned to a Map Reduce task which consists of two stages- a ‘Map stage’ and a ‘Reduce stage’. A mapper’s job during Map Stage is to “read” the data from join tables and to “return” the ‘join key’ and ‘join value’ pair into an intermediate file. Further, in the shuffle stage, this intermediate file is then sorted and merged. The reducer’s job during reduce stage is to take this sorted result as input and complete the task of join.
+
+
+
+```bash
+select customers.initials,orders.order_id,orders.total_cost from customers join orders on customers.customer_id=orders.customer_id;
+```
+
+As you can see in normal join all the task will be performed by both mapper and reducer.
+
+
+![6a.png](./screenshot/6a.png)
+
+
+A table can be loaded into the memory completely within a mapper without using the Map/Reducer process. It reads the data from the smaller table and stores it in an in-memory hash table and then serializes it to a hash memory file, thus substantially reducing the time. It is also known as Map Side Join in Hive. Basically, it involves performing joins between 2 tables by using only the Map phase and skipping the Reduce phase. A time decrease in your queries’ computation can be observed if they regularly use a small table joins.Map-side join helps in minimizing the cost that is incurred for sorting and merging in the shuffle and reduce stages.Map-side join also helps in improving the performance of the task by decreasing the time to finish the task.
+
+Before running the query, we have to set the below property to true:
+
+```bash
+set hive.auto.convert.join=true
+```
+```bash
+SELECT /*+ MAPJOIN(orders) */ customers.initials,orders.order_id,orders.total_cost from customers join orders on customers.customer_id=orders.customer_id;
+```
+
+The join query for map join is written as above, and the result we get is:
+
+![7a.png](./screenshot/7a.png)
+
+verify the time taken for both Map Join and Normal Join.
