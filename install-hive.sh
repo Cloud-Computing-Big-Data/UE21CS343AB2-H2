@@ -27,13 +27,13 @@ else
     echo "Run source ~/.bashrc and make sure HIVE_HOME is set. Once done, run ./start-hive.sh to start hive. For now, wait for this process to complete for some post-installation steps."
 fi
 
-jps_count = $(jps | wc -l)
+jps_count=$(jps | wc -l)
 if [ $jps_count == 1 ]; then
     echo "Starting Hadoop"
     $HADOOP_HOME/sbin/start-all.sh
 fi
 
-jps_count = $(jps | wc -l)
+jps_count=$(jps | wc -l)
 if [ $jps_count < 6 ]; then
     echo "Hadoop startup failed. Exiting"
     jps
