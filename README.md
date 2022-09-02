@@ -99,7 +99,23 @@ To check the partitions stored in hadoop data warehouse:
 
 ```bash
 cd
-hdfs dfs -ls /user/hive/warehouse/netflix_partition
+hdfs dfs -ls /user/hive/warehouse/{PATH}
 ```
 
 ![4a.png](./screenshot/4a.png)
+
+### BUCKETS
+
+Tables or partitions are sub-divided into buckets, to provide extra structure to the data that may be used for more efficient querying. Bucketing works based on the value of hash function of some column of a table.
+
+The command below allows the correct number of reducers and the cluster by column to be automatically selected based on the table:
+
+```bash
+set hive.enforce.bucketing=True;
+```
+
+Create bucketing on country column on top of partitioning by type:
+
+```bash
+CREATE TABLE netflix_bucket(title String,director String) PARTITIONED BY(type String) CLUSTERED BY country INTO 10 BUCKETS
+```
