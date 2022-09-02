@@ -8,7 +8,7 @@ First provide both the shell scripts the necessary permissions
 chmod +x *.sh 
 ```
 
-To install hive run the following command:
+To install hive run the following command ,if hive is launched your installation is successfull:
 
 ```bash
 ./install-hive.sh
@@ -95,6 +95,9 @@ insert into netflix_partition partition(type) select title,director,country,rele
 
 ![3a.png](./screenshot/3a.png)
 
+![3a1.png](./screenshot/3a1.png)
+
+
 To check the partitions stored in hadoop data warehouse:
 
 ```bash
@@ -114,11 +117,18 @@ The command below allows the correct number of reducers and the cluster by colum
 set hive.enforce.bucketing=True;
 ```
 
-Create bucketing on country column on top of partitioning by type:
+Create bucketing on country column on top of partitioning by type and insert data:
 
 ```bash
-CREATE TABLE netflix_bucket(title String,director String) PARTITIONED BY(type String) CLUSTERED BY country INTO 10 BUCKETS
+CREATE TABLE netflix_bucket(title String,director String,country String) PARTITIONED BY(type String) CLUSTERED BY (country) INTO 10 BUCKETS;
+insert into table netflix_bucket partition(type='Movie') select title,director,country from netflix where type='Movie';
 ```
+![5a1.png](./screenshot/5a1.png)
+
+![5a2.png](./screenshot/5a2.png)
+
+![5a3.png](./screenshot/5a3.png)
+
 To check the buckets stored in hadoop data warehouse:
 
 ```bash
@@ -126,7 +136,7 @@ cd
 hdfs dfs -ls /user/hive/warehouse/{PATH}
 ```
 
-![5a.png](./screenshot/5a.png)
+![5a4.png](./screenshot/5a4.png)
 
 ## TASK 2- HQL Map Join and Normal Join
 
@@ -157,8 +167,8 @@ Download the dataset "customers.csv" and "orders.csv" provided in the <a href="h
 Similar to Task1 create tables and load data into the created tables.
 
 ```bash
-create table customers(customer_id int,initals String,street String,country String);
-create table orders(customer_id int,order_id int,order_date date,total_cost int);
+create table customers(customer_id String,initals String,street String,country String);
+create table orders(customer_id String,order_id String,order_date date,total_cost int);
 ```
 
 
