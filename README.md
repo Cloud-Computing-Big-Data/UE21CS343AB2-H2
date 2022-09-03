@@ -22,7 +22,7 @@ Start hive shell using the following command:
 ## TASK 1 - Create tables, partitions and buckets in hive.
 
 
-Download the dataset "netflix1.csv" provided in the <a href="https://drive.google.com/drive/u/0/folders/1_woAsnz9hY798NE-41LX7owmupoS_1uM" target="_blank">link</a>
+Download the dataset "netflix1.csv" provided in the <a href="https://drive.google.com/drive/folders/15aXN759-l-z5Vdyg6gkNWDCv080qrKfx?usp=sharing" target="_blank">link</a>
 
 <b></b>
 
@@ -145,7 +145,7 @@ hdfs dfs -ls /user/hive/warehouse/{PATH}
 Given two csv files customers.csv and orders.csv, create two tables namely customers and orders using the same structure in the csv file,load the data from csv files to the tables.Perform MapJoin and normal Join operations in hive.
 
 
-Refer the dataset "customers.csv" and "orders.csv" provided in the <a href="https://drive.google.com/drive/u/0/folders/1_woAsnz9hY798NE-41LX7owmupoS_1uM" target="_blank">link</a>
+Refer the dataset "customers.csv" and "orders.csv" provided in the <a href="https://drive.google.com/drive/folders/15aXN759-l-z5Vdyg6gkNWDCv080qrKfx?usp=sharing" target="_blank">link</a>
 
 ### ORDERS
 
