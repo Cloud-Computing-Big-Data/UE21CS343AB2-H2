@@ -145,7 +145,7 @@ hdfs dfs -ls /user/hive/warehouse/{PATH}
 Given two csv files customers.csv and orders.csv, create two tables namely customers and orders using the same structure in the csv file,load the data from csv files to the tables.Perform MapJoin and normal Join operations in hive.
 
 
-Download the dataset "customers.csv" and "orders.csv" provided in the <a href="https://drive.google.com/drive/u/0/folders/1_woAsnz9hY798NE-41LX7owmupoS_1uM" target="_blank">link</a>
+Refer the dataset "customers.csv" and "orders.csv" provided in the <a href="https://drive.google.com/drive/u/0/folders/1_woAsnz9hY798NE-41LX7owmupoS_1uM" target="_blank">link</a>
 
 ### ORDERS
 
@@ -201,7 +201,7 @@ As you can see in normal join all the task will be performed by both mapper and 
 
 
 ![6b.png](./screenshot/6b.png)
-
+![6b1.png](./screenshot/6b1.png)
 
 A table can be loaded into the memory completely within a mapper without using the Map/Reducer process. It reads the data from the smaller table and stores it in an in-memory hash table and then serializes it to a hash memory file, thus substantially reducing the time. It is also known as Map Side Join in Hive. Basically, it involves performing joins between 2 tables by using only the Map phase and skipping the Reduce phase. A time decrease in your queries’ computation can be observed if they regularly use a small table joins.Map-side join helps in minimizing the cost that is incurred for sorting and merging in the shuffle and reduce stages.Map-side join also helps in improving the performance of the task by decreasing the time to finish the task.
 
