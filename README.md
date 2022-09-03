@@ -61,7 +61,7 @@ Take a screenshot of the terminal output
 
 Hive is a data warehouse database for Hadoop, all database and table data files are stored at HDFS location /user/hive/warehouse by default.
 
-To check all database and table files stored use the following command
+To check all database and table files stored open a new terminal and use the following command
 
 ```bash
 cd
@@ -90,7 +90,8 @@ create table netflix_partition(title String,director String,country String,relea
 Now we will load the data into the partitioned table using the following command
 
 ```bash
-insert into netflix_partition partition(type) select title,director,country,release_year,type from netflix;
+load data local inpath 'PATH_TO_netflix1.csv_FILE' into table netflix_partition partition(type='Movie');
+load data local inpath 'PATH_TO_netflix1.csv_FILE' into table netflix_partition partition(type='Tv shows');
 ```
 
 ![3a.png](./screenshot/3a.png)
@@ -98,7 +99,7 @@ insert into netflix_partition partition(type) select title,director,country,rele
 ![3a1.png](./screenshot/3a1.png)
 
 
-To check the partitions stored in hadoop data warehouse:
+To check the partitions stored in hadoop data warehouse open a new terminal and use the following command:
 
 ```bash
 cd
@@ -129,7 +130,7 @@ insert into table netflix_bucket partition(type='Movie') select title,director,c
 
 ![5a3.png](./screenshot/5a3.png)
 
-To check the buckets stored in hadoop data warehouse:
+To check the buckets stored in hadoop data warehouse open a new terminal and use the following command:
 
 ```bash
 cd
@@ -150,16 +151,16 @@ Download the dataset "customers.csv" and "orders.csv" provided in the <a href="h
 
 | attribute     | Description                  | DataType  |
 | ------------- |:-------------:               | -----:    |
-| customer_id   | unique values                | int       |
-| order_id      | unique values                | int       |
-| order_date    | order date                   | date      |
+| customer_id   | Customer ID                  | String    |
+| order_id      | Order ID                     | String    |
+| order_date    | order date                   | String    |
 | total_cost    | Total Cost                   | int       |
 
 ### CUSTOMERS 
 
 | attribute     | Description                  | DataType  |
 | ------------- |:-------------:               | -----:    |
-| customer_id   | unique values                | int       |
+| customer_id   | Customer ID                  | String    |
 | initals       | Customer Initials            | String    |
 | street        | Street                       | String    |
 | country       | Country                      | String    |
@@ -167,14 +168,23 @@ Download the dataset "customers.csv" and "orders.csv" provided in the <a href="h
 Similar to Task1 create tables and load data into the created tables.
 
 ```bash
-create table customers(customer_id String,initals String,street String,country String);
-create table orders(customer_id String,order_id String,order_date date,total_cost int);
+create table customers(customer_id int,initals String,street String,country String);
+create table orders(customer_id int,order_id String,order_date date,total_cost int);
 ```
 
 
 ```bash
-load data local inpath 'PATH_TO_customers.csv_FILE' into table customers;
-load data local inpath 'PATH_TO_orders.csv_FILE' into table orders;
+insert into customers values
+(1,"GH","123 road","UK"),
+(3,"JK","456 road","SP"),
+(2,"NL","789 road","BZ"),
+(4,"AJ","1011 road","AU"),
+(5,"PK","1213 road","IN");
+insert into orders values
+(1,1,"2022-01-04",100),
+(3,4,"2022-03-07",20),
+(2,2,"2022-01-02",60),
+(2,3,"2022-02-01",150);
 ```
 
 Let us first understand the functionality of normal join,
@@ -184,7 +194,7 @@ Whenever, we apply join operation, the job will be assigned to a Map Reduce task
 
 
 ```bash
-select customers.initials,orders.order_id,orders.total_cost from customers join orders on customers.customer_id=orders.customer_id;
+select customers.initals,orders.order_id,orders.total_cost from customers join orders on customers.customer_id=orders.customer_id;
 ```
 
 As you can see in normal join all the task will be performed by both mapper and reducer.
@@ -201,7 +211,7 @@ Before running the query, we have to set the below property to true:
 set hive.auto.convert.join=true
 ```
 ```bash
-SELECT /*+ MAPJOIN(orders) */ customers.initials,orders.order_id,orders.total_cost from customers join orders on customers.customer_id=orders.customer_id;
+SELECT /*+ MAPJOIN(orders) */ customers.initals,orders.order_id,orders.total_cost from customers join orders on customers.customer_id=orders.customer_id;
 ```
 
 The join query for map join is written as above, and the result we get is:
@@ -209,3 +219,93 @@ The join query for map join is written as above, and the result we get is:
 ![7b.png](./screenshot/7b.png)
 
 verify the time taken for both Map Join and Normal Join.
+
+## TASK 3 - Update ,delete entries in a Table and Query
+
+Firstly you need to enable ACID Transactions to support transactional queries, one of the important property need to know is hive.txn.manager which is used to set Hive Transaction manager.
+
+Below are the properties you need to enable ACID transactions.
+
+```bash
+
+SET hive.support.concurrency=true;
+SET hive.txn.manager=org.apache.hadoop.hive.ql.lockmgr.DbTxnManager;
+# The follwoing are not required if you are using Hive 2.0
+SET hive.enforce.bucketing=true;
+SET hive.exec.dynamic.partition.mode=nostrict;
+# The following parameters are required for standalone hive metastore
+SET hive.compactor.initiator.on=true;
+SET hive.compactor.worker.threads=1
+
+
+```
+
+To support ACID transactions you need to create a table with TBLPROPERTIES (‘transactional’=’true’); and the store type of the table should be ORC.
+
+```bash
+CREATE TABLE table_name (
+ col_name data_type)
+ STORED AS ORC
+ TBLPROPERTIES ('transactional'='true');
+```
+Insert Records into the table
+
+```bash
+INSERT INTO table_name VALUES(col_value);
+```
+
+Hive UPDATE SQL query is used to update the existing records in a table.When WHERE clause not used, Hive updates all records in a table.By using WHERE clause you can specify a condition which records to update.
+
+Update statement Syntax:
+
+```bash
+
+UPDATE [dbname.]tablename 
+SET column = value [, column = value ...] 
+[WHERE expression]
+
+```
+
+Hive DELETE SQL query is used to delete the records from a table.
+
+Delete statement Syntax:
+
+```bash
+
+DELETE FROM [dbname.]tablename 
+[WHERE expression]
+
+```
+
+### Problem statement:
+
+Create a Table items with the following attributes
+
+| attribute     | Description                  | DataType  |
+| ------------- |:-------------:               | -----:    |
+| id            | item ID (primary key)        | int       |
+| item_name     | Item name                    | String    |
+| item_cost     | Item Cost                    | double    |
+
+Insert the below values into the table items
+
+| id    | item_name       | item_cost |
+| ------|:-------------:  | -----:    |
+| 1     | chocolate       | 100       |
+| 2     | grape           | 50        |
+| 3     | chips           | 10        |
+| 4     | oranges         | 80        |
+| 5     | apples          | 90        |
+| 6     | chips           | 20        |
+| 7     | chocolate       | 90        |
+| 8     | grape           | 100       |
+| 9     | chips           | 40        |
+| 10    | oranges         | 70        |
+| 11    | apples          | 90        |
+| 12    | chips           | 20        |
+
+Update item_cost of chips to 30 
+
+Delete the row with maximum item_cost 
+
+Write a query to find the total number of each item and check the number of mappers and reducers executed by that query.
