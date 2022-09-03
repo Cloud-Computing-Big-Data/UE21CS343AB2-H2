@@ -1,10 +1,10 @@
-jps_count = $(jps | wc -l)
+jps_count=$(jps | wc -l)
 if [ $jps_count == 1 ]; then
     echo "Starting Hadoop"
     $HADOOP_HOME/sbin/start-all.sh
 fi
 
-jps_count = $(jps | wc -l)
+jps_count=$(jps | wc -l)
 if [ $jps_count < 6 ]; then
     echo "Hadoop startup failed. Exiting"
     jps
