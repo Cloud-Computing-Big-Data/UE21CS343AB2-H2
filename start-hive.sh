@@ -5,7 +5,7 @@ if [ $jps_count == 1 ]; then
 fi
 
 jps_count=$(jps | wc -l)
-if [ $jps_count < 6 ]; then
+if [ $jps_count -lt 6 ]; then
     echo "Hadoop startup failed. Exiting"
     jps
     exit 1
