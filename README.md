@@ -1,5 +1,13 @@
 # Hive Installation Guide and HQL Hands On - H2
 
+Clone this repository to your local machine by running the command below and follow the instructions in the `README.md` file.
+
+```bash
+git clone https://github.com/Cloud-Computing-Big-Data/UE20CS322-H2.git
+```
+
+**ALL COMMANDS MUST BE RUN ONLY AFTER CLONING THE REPO AND FROM WITHIN THE LOCALLY CLONED FOLDER ONLY**
+
 ## Step 1 - Install hive by executing the shell script provided
 
 First provide both the shell scripts the necessary permissions
@@ -11,18 +19,22 @@ chmod +x *.sh
 To install hive run the following command ,if hive is launched your installation is successfull:
 
 ```bash
-./install-hive.sh
+source install-hive.sh
 ```
+
+Please do not run `./install-hive.sh` or `bash install-hive.sh` or any other variations apart from `source` as it will not work.
 
 Start hive shell using the following command:
 
 ```bash
-./start-hive.sh
+start-hive.sh
 ```
+
+It is necessary to run the above command everytime you want to start hive shell.
 ## TASK 1 - Create tables, partitions and buckets in hive.
 
 
-Download the dataset "netflix1.csv" provided in the <a href="https://drive.google.com/drive/folders/15aXN759-l-z5Vdyg6gkNWDCv080qrKfx?usp=sharing" target="_blank">link</a>
+Find the dataset "netflix1.csv" provided in the repo <a href="https://github.com/Cloud-Computing-Big-Data/UE20CS322-H2/blob/main/netflix1.csv" target="_blank">here</a>
 
 <b></b>
 
@@ -46,7 +58,7 @@ create table netflix(show_id String,type String,title String,director String,cou
 Now load the csv file into the netflix table created
 
 ```bash
-load data local inpath 'PATH_TO_netflix1.csv_FILE' into table netflix;
+load data local inpath 'PATH_TO_netflix1.csv' into table netflix;
 ```
 
 Since the dataset is huge lets query the first 3 records in the database.
@@ -145,7 +157,7 @@ hdfs dfs -ls /user/hive/warehouse/{PATH}
 Given two csv files customers.csv and orders.csv, create two tables namely customers and orders using the same structure in the csv file,load the data from csv files to the tables.Perform MapJoin and normal Join operations in hive.
 
 
-Refer the dataset "customers.csv" and "orders.csv" provided in the <a href="https://drive.google.com/drive/folders/15aXN759-l-z5Vdyg6gkNWDCv080qrKfx?usp=sharing" target="_blank">link</a>
+Download the dataset "customers.csv" and "orders.csv" provided in the <a href="https://drive.google.com/drive/u/0/folders/1_woAsnz9hY798NE-41LX7owmupoS_1uM" target="_blank">link</a>
 
 ### ORDERS
 
@@ -208,7 +220,7 @@ A table can be loaded into the memory completely within a mapper without using t
 Before running the query, we have to set the below property to true:
 
 ```bash
-set hive.auto.convert.join=true
+set hive.auto.convert.join=true;
 ```
 ```bash
 SELECT /*+ MAPJOIN(orders) */ customers.initals,orders.order_id,orders.total_cost from customers join orders on customers.customer_id=orders.customer_id;
@@ -230,12 +242,9 @@ Below are the properties you need to enable ACID transactions.
 
 SET hive.support.concurrency=true;
 SET hive.txn.manager=org.apache.hadoop.hive.ql.lockmgr.DbTxnManager;
-# The follwoing are not required if you are using Hive 2.0
-SET hive.enforce.bucketing=true;
-SET hive.exec.dynamic.partition.mode=nostrict;
 # The following parameters are required for standalone hive metastore
 SET hive.compactor.initiator.on=true;
-SET hive.compactor.worker.threads=1
+SET hive.compactor.worker.threads=1;
 
 
 ```
