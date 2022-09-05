@@ -25,9 +25,8 @@ source install-hive.sh
 Please do not run `./install-hive.sh` or `bash install-hive.sh` or any other variations apart from `source` as it will not work.
 
 Take a screenshot of the terminal output and save it as `1a.png`.
-![1a.png](./screenshot/1a.png)
 
-Start hive shell using the following command:
+![1a](./screenshot/1a.png)Start hive shell using the following command:
 
 ```bash
 start-hive.sh
