@@ -1,40 +1,39 @@
 # Hive Installation Guide and HQL Hands On - H2
 
-Clone this repository to your local machine by running the command below and follow the instructions in the `README.md` file.
-
-```bash
-git clone https://github.com/Cloud-Computing-Big-Data/UE20CS322-H2.git
-```
+This guide is the CLASS component for the Hive Installation and HQL Hands On. Before you start, please make sure you have completed the HOME part found [here](https://github.com/Cloud-Computing-Big-Data/UE20CS322-H2/blob/main/INSTALL_HIVE.md). Follow the instructions in this file to complete the hands-on/tutorial tasks.
 
 **ALL COMMANDS MUST BE RUN ONLY AFTER CLONING THE REPO AND FROM WITHIN THE LOCALLY CLONED FOLDER ONLY**
 
-## Step 1 - Install hive by executing the shell script provided
+## Few useful commands
 
-First provide both the shell scripts the necessary permissions
-
-```bash
-chmod +x *.sh 
-```
-
-To install hive run the following command ,if hive is launched your installation is successfull:
-
-```bash
-source install-hive.sh
-```
-
-Please do not run `./install-hive.sh` or `bash install-hive.sh` or any other variations apart from `source` as it will not work.
-
-Start hive shell using the following command:
+### To start the Hive CLI
 
 ```bash
 start-hive.sh
 ```
 
-It is necessary to run the above command everytime you want to start hive shell.
+### If you are running into issues with starting Hadoop, try the following
+
+```bash
+stop-all.sh
+sudo rm -rf ~/dfsdata/
+sudo rm -rf ~/tmpdata/
+hdfs namenode -format
+start-all.sh
+```
+
+### To remove all data from HDFS which is involved with Hive
+
+```bash
+hdfs dfs -rm -r -f /user*
+```
+
+**(Screenshot numbers begin from 2 since screenshot 1a was from the HOME component)**
+
 ## TASK 1 - Create tables, partitions and buckets in hive.
 
 
-Find the dataset "netflix1.csv" provided in the repo <a href="https://github.com/Cloud-Computing-Big-Data/UE20CS322-H2/blob/main/netflix1.csv" target="_blank">here</a>
+Find the dataset "netflix1.csv" provided in the repo <a href="https://github.com/Cloud-Computing-Big-Data/UE20CS322-H2/blob/main/netflix1.csv" target="_blank">here</a>. You would find this dataset in the cloned repo as well.
 
 <b></b>
 
@@ -49,124 +48,129 @@ Find the dataset "netflix1.csv" provided in the repo <a href="https://github.com
 
 ### TABLE
 
-Create a table with the same structure as given in csv file
+Create a table with the above schema in the Hive shell.
 
 ```bash
-create table netflix(show_id String,type String,title String,director String,country String,release_year int,primary key (show_id) disable novalidate);
+create table netflix(show_id String,type String,title String,director String,country String,release_year int,primary key (show_id) disable novalidate) row format delimited fields terminated by ',';
 ```
 
-Now load the csv file into the netflix table created
+Now load the CSV file into the netflix table created in the Hive shell.
 
 ```bash
 load data local inpath 'PATH_TO_netflix1.csv' into table netflix;
 ```
 
+**Make sure you replace the PATH_TO_netflix1.csv with the actual path to the file**
+
 Since the dataset is huge lets query the first 3 records in the database.
-When you perform "select * from tablename", Hive fetches the whole data from file as a FetchTask rather than a mapreduce task which just dumps the data as it is without doing anything on it. This is similar to "hadoop dfs -text <filename>".Therefore when queried using SELECT, FILTER, LIMIT, this property skips mapreduce and uses FETCH task.As a result Hive can execute query without running mapreduce task as shown below.
+When you perform "select * from tablename", Hive fetches the whole data from file as a FetchTask rather than a mapreduce task which just dumps the data as it is without doing anything on it. This is similar to "hadoop dfs -text <filename>".Therefore when queried using SELECT, FILTER, LIMIT, this property skips mapreduce and uses FETCH task. As a result Hive can execute query without running mapreduce task as shown below.
 
 ```bash
 select * from netflix limit 3;
 ```
-Take a screenshot of the terminal output
+**Take a screenshot of the terminal output and name it 2a.png**(If you have multiple screenshots because all content did not fit in one, you can name them 2a1.png, 2a2.png, 2a3.png, etc.)
 
-![1.png](./screenshot/1.png)
+![2a.png](./screenshot/2a.png)
 
 Hive is a data warehouse database for Hadoop, all database and table data files are stored at HDFS location /user/hive/warehouse by default.
 
 To check all database and table files stored open a new terminal and use the following command
 
 ```bash
-cd
 hdfs dfs -ls /user/hive/warehouse
+hdfs dfs -ls /user/hive/warehouse/netflix
 ```
 
-![2a.png](./screenshot/2a.png)
+**Take a screenshot of the terminal output and name it 2b.png**
+
+![2b.png](./screenshot/2b.png)
 
 ### PARTITION
 
 Hive organizes tables into partitions. It is a way of dividing a table into related parts based on the values of partitioned columns such as type,country etc. Using partition, it is easy to query a portion of the data.
 For example, a table named Employee contains employee data such as id, name, dept, and yoj (i.e., year of joining). Suppose you need to retrieve the details of all employees who joined in 2012. A query searches the whole table for the required information. However, if you partition the employee data with the year and store it in a separate file, it reduces the query processing time. 
 
-Firstly enable dynamic partition using the commands as follows:
+Firstly enable dynamic partition using the commands in the Hive shell as follows:
 
 ```bash
 set hive.exec.dynamic.partition=True;
 set hive.exec.dynamic.partition.mode=nonstrict;
 ```
 
-To create a partitioned table we have to follow the below command:
+To create a partitioned table we have to follow the below command in the Hive shell:
 
 ```bash
 create table netflix_partition(title String,director String,country String,release_year int) partitioned by (type String);
 ```
-Now we will load the data into the partitioned table using the following command
+Now we will load the data into the partitioned table using the following command in the Hive shell:
 
 ```bash
-load data local inpath 'PATH_TO_netflix1.csv_FILE' into table netflix_partition partition(type='Movie');
-load data local inpath 'PATH_TO_netflix1.csv_FILE' into table netflix_partition partition(type='Tv shows');
+insert into table netflix_partition partition(type='Movie') select title,director,country,release_year from netflix where type='Movie';
+insert into table netflix_partition partition(type='Tv shows') select title,director,country,release_year from netflix where type='Tv shows';
 ```
-
-![3a.png](./screenshot/3a.png)
-
-![3a1.png](./screenshot/3a1.png)
-
-
-To check the partitions stored in hadoop data warehouse open a new terminal and use the following command:
+Let's check the partitioned table
 
 ```bash
-cd
-hdfs dfs -ls /user/hive/warehouse/{PATH}
+select * from netflix_partition limit 3;
 ```
 
-![4a.png](./screenshot/4a.png)
+**Take a screenshot of the terminal output and name it 2c.png**(If you have multiple screenshots because all content did not fit in one, you can name them 2c1.png, 2c2.png, 2c3.png, etc.)
+
+![2c1.png](./screenshot/2c1.png)
+![2c2.png](./screenshot/2c2.png)
+
+
+To check the partitions stored in Hadoop data warehouse, use the following command on the terminal:
+
+```bash
+hdfs dfs -ls /user/hive/warehouse/netflix_partition/type=Movie
+hdfs dfs -ls /user/hive/warehouse/netflix_partition/type=Tv shows
+```
+
+**Take a screenshot of the terminal output and name it 2d.png**
+
+![2d.png](./screenshot/2d.png)
 
 ### BUCKETS
 
 Tables or partitions are sub-divided into buckets, to provide extra structure to the data that may be used for more efficient querying. Bucketing works based on the value of hash function of some column of a table.
 
-The command below allows the correct number of reducers and the cluster by column to be automatically selected based on the table:
+The command below allows the correct number of reducers and the cluster by column to be automatically selected based on the table in the Hive shell:
 
 ```bash
 set hive.enforce.bucketing=True;
 ```
 
-Create bucketing on country column on top of partitioning by type and insert data:
+Create bucketing on country column on top of partitioning by type and insert data in the Hive shell:
 
 ```bash
 CREATE TABLE netflix_bucket(title String,director String,country String) PARTITIONED BY(type String) CLUSTERED BY (country) INTO 10 BUCKETS;
 insert into table netflix_bucket partition(type='Movie') select title,director,country from netflix where type='Movie';
 ```
-![5a1.png](./screenshot/5a1.png)
 
-![5a2.png](./screenshot/5a2.png)
+**Take a screenshot of the terminal output and name it 2e.png**(If you have multiple screenshots, you can name them 2e1.png, 2e2.png, 2e3.png, etc.)
 
-![5a3.png](./screenshot/5a3.png)
+![2e1.png](./screenshot/2e1.png)
 
-To check the buckets stored in hadoop data warehouse open a new terminal and use the following command:
+![2e2.png](./screenshot/2e2.png)
+
+![2e3.png](./screenshot/2e3.png)
+
+To check the buckets stored in hadoop data warehouse, use the following command on the terminal:
 
 ```bash
-cd
-hdfs dfs -ls /user/hive/warehouse/{PATH}
+hdfs dfs -ls /user/hive/warehouse/netflix_bucket/type=Movie
 ```
 
-![5a4.png](./screenshot/5a4.png)
+**Take a screenshot of the terminal output and name it 2f.png**
+
+![2f.png](./screenshot/2f.png)
 
 ## TASK 2- HQL Map Join and Normal Join
 
 ### Problem statement : 
-Given two csv files customers.csv and orders.csv, create two tables namely customers and orders using the same structure in the csv file,load the data from csv files to the tables.Perform MapJoin and normal Join operations in hive.
+Given two datasets, customers and orders, perform MapJoin and normal Join operations in Hive.
 
-
-Download the dataset "customers.csv" and "orders.csv" provided in the <a href="https://drive.google.com/drive/u/0/folders/1_woAsnz9hY798NE-41LX7owmupoS_1uM" target="_blank">link</a>
-
-### ORDERS
-
-| attribute     | Description                  | DataType  |
-| ------------- |:-------------:               | -----:    |
-| customer_id   | Customer ID                  | String    |
-| order_id      | Order ID                     | String    |
-| order_date    | order date                   | String    |
-| total_cost    | Total Cost                   | int       |
 
 ### CUSTOMERS 
 
@@ -177,7 +181,17 @@ Download the dataset "customers.csv" and "orders.csv" provided in the <a href="h
 | street        | Street                       | String    |
 | country       | Country                      | String    |
 
-Similar to Task1 create tables and load data into the created tables.
+### ORDERS
+
+| attribute     | Description                  | DataType  |
+| ------------- |:-------------:               | -----:    |
+| customer_id   | Customer ID                  | String    |
+| order_id      | Order ID                     | String    |
+| order_date    | order date                   | String    |
+| total_cost    | Total Cost                   | int       |
+
+
+Similar to Task 1, create tables and load data into the created tables.
 
 ```bash
 create table customers(customer_id int,initals String,street String,country String);
@@ -199,38 +213,43 @@ insert into orders values
 (2,3,"2022-02-01",150);
 ```
 
+**Take a screenshot of the terminal output and name it 3a.png**(If you have multiple screenshots, you can name them 3a1.png, 3a2.png, 3a3.png, etc.)
+
+![3a1.png](./screenshot/3a1.png)
+![3a2.png](./screenshot/3a2.png)
+
 Let us first understand the functionality of normal join,
 
 Whenever, we apply join operation, the job will be assigned to a Map Reduce task which consists of two stages- a ‘Map stage’ and a ‘Reduce stage’. A mapper’s job during Map Stage is to “read” the data from join tables and to “return” the ‘join key’ and ‘join value’ pair into an intermediate file. Further, in the shuffle stage, this intermediate file is then sorted and merged. The reducer’s job during reduce stage is to take this sorted result as input and complete the task of join.
-
 
 
 ```bash
 select customers.initals,orders.order_id,orders.total_cost from customers join orders on customers.customer_id=orders.customer_id;
 ```
 
-As you can see in normal join all the task will be performed by both mapper and reducer.
+As you can see in normal join all the tasks will be performed by both mapper and reducer. **Take a screenshot of the terminal output and name it 3b.png**(If you have multiple screenshots, you can name them 3b1.png, 3b2.png, 3b3.png, etc.)
 
+![3b1.png](./screenshot/3b1.png)
+![3b2.png](./screenshot/3b2.png)
 
-![6b.png](./screenshot/6b.png)
-![6b1.png](./screenshot/6b1.png)
+A table can be loaded into the memory completely within a mapper without using the Map/Reducer process. It reads the data from the smaller table and stores it in an in-memory hash table and then serializes it to a hash memory file, thus substantially reducing the time. It is also known as Map Side Join in Hive. Basically, it involves performing joins between 2 tables by using only the Map phase and skipping the Reduce phase. A time decrease in your queries’ computation can be observed if they regularly use a small table joins. Map-side join helps in minimizing the cost that is incurred for sorting and merging in the shuffle and reduce stages. Map-side join also helps in improving the performance of the task by decreasing the time to finish the task.
 
-A table can be loaded into the memory completely within a mapper without using the Map/Reducer process. It reads the data from the smaller table and stores it in an in-memory hash table and then serializes it to a hash memory file, thus substantially reducing the time. It is also known as Map Side Join in Hive. Basically, it involves performing joins between 2 tables by using only the Map phase and skipping the Reduce phase. A time decrease in your queries’ computation can be observed if they regularly use a small table joins.Map-side join helps in minimizing the cost that is incurred for sorting and merging in the shuffle and reduce stages.Map-side join also helps in improving the performance of the task by decreasing the time to finish the task.
-
-Before running the query, we have to set the below property to true:
+Before running the query, we have to set the below property to true in the Hive shell:
 
 ```bash
 set hive.auto.convert.join=true;
 ```
+
+Query:
 ```bash
 SELECT /*+ MAPJOIN(orders) */ customers.initals,orders.order_id,orders.total_cost from customers join orders on customers.customer_id=orders.customer_id;
 ```
 
-The join query for map join is written as above, and the result we get is:
+**Take a screenshot of the terminal output and name it 3c.png.**
 
-![7b.png](./screenshot/7b.png)
+![3c.png](./screenshot/3c.png)
 
-verify the time taken for both Map Join and Normal Join.
+Verify the time taken for both Map Join and Normal Join.
 
 ## TASK 3 - Update ,delete entries in a Table and Query
 
@@ -239,14 +258,11 @@ Firstly you need to enable ACID Transactions to support transactional queries, o
 Below are the properties you need to enable ACID transactions.
 
 ```bash
-
 SET hive.support.concurrency=true;
 SET hive.txn.manager=org.apache.hadoop.hive.ql.lockmgr.DbTxnManager;
 # The following parameters are required for standalone hive metastore
 SET hive.compactor.initiator.on=true;
 SET hive.compactor.worker.threads=1;
-
-
 ```
 
 To support ACID transactions you need to create a table with TBLPROPERTIES (‘transactional’=’true’); and the store type of the table should be ORC.
@@ -257,6 +273,7 @@ CREATE TABLE table_name (
  STORED AS ORC
  TBLPROPERTIES ('transactional'='true');
 ```
+
 Insert Records into the table
 
 ```bash
@@ -268,27 +285,27 @@ Hive UPDATE SQL query is used to update the existing records in a table.When WHE
 Update statement Syntax:
 
 ```bash
-
-UPDATE [dbname.]tablename 
-SET column = value [, column = value ...] 
-[WHERE expression]
-
+UPDATE tablename 
+SET column = value 
+WHERE expression;
 ```
+(The WHERE clause is optional. If you omit the WHERE clause, all records in the table will be updated.)
+
 
 Hive DELETE SQL query is used to delete the records from a table.
 
 Delete statement Syntax:
 
 ```bash
-
-DELETE FROM [dbname.]tablename 
-[WHERE expression]
-
+DELETE FROM tablename 
+WHERE expression;
 ```
+
+(The WHERE clause is optional. If you omit the WHERE clause, all records in the table will be deleted.)
 
 ### Problem statement:
 
-Create a Table items with the following attributes
+Create a Table with table name as "costs" and items with the following attributes
 
 | attribute     | Description                  | DataType  |
 | ------------- |:-------------:               | -----:    |
@@ -313,8 +330,36 @@ Insert the below values into the table items
 | 11    | apples          | 90        |
 | 12    | chips           | 20        |
 
-Update item_cost of chips to 30 
+Update item_cost of chips to 30. **Take a screenshot of the terminal output and name it 4a.png.**
 
-Delete the row with maximum item_cost 
+Delete all the rows with maximum item_cost. **Take a screenshot of the terminal output and name it 4b.png.**
 
-Write a query to find the total number of each item and check the number of mappers and reducers executed by that query.
+Write a query to find the total number of each item and check the number of mappers and reducers executed by that query. **Take a screenshot of the terminal output and name it 4c.png.**
+
+## TASK 4 - Evaluation
+
+This activity is graded and will be evaluated by two procedures. Both procedures are mandatory to be completed. **Deadline for this activity is 11:59pm on 7th September 2022.**
+
+### Procedure 1 - Auto-Graded Evaluation
+
+Run the following pyc file to evaluate your task. You can run this as many times until you get the right answer.
+
+For RR Campus Students:
+```bash
+python3 eval-rr.pyc
+```
+
+For EC Campus Students:
+```bash
+python3 eval-ec.pyc
+```
+
+**Take a screenshot of the terminal output and name it 5a.png.**
+
+### Procedure 2 - Google Form Evaluation
+
+Submit the PDF containing all the screenshots specified throughout the activity in the Google Form. The PDF should be named as (SRN).pdf
+
+Link for RR Campus Students: https://forms.gle/oWqAwrv1y2S62w7NA
+
+Link for EC Campus Students: https://forms.gle/ms6BzkKso1Ae4Uv67
