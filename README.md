@@ -106,7 +106,7 @@ Now we will load the data into the partitioned table using the following command
 
 ```bash
 insert into table netflix_partition partition(type='Movie') select title,director,country,release_year from netflix where type='Movie';
-insert into table netflix_partition partition(type='Tv shows') select title,director,country,release_year from netflix where type='Tv shows';
+insert into table netflix_partition partition(type='TV Show') select title,director,country,release_year from netflix where type='TV Show';
 ```
 Let's check the partitioned table
 
@@ -124,7 +124,7 @@ To check the partitions stored in Hadoop data warehouse, use the following comma
 
 ```bash
 hdfs dfs -ls /user/hive/warehouse/netflix_partition/type=Movie
-hdfs dfs -ls /user/hive/warehouse/netflix_partition/type=Tv shows
+hdfs dfs -ls /user/hive/warehouse/netflix_partition/type=Tv\ Show
 ```
 
 **Take a screenshot of the terminal output and name it 2d.png**
