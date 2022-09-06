@@ -69,7 +69,7 @@ select * from netflix limit 3;
 ```
 Take a screenshot of the terminal output
 
-![1a.png](./screenshot/1a.png)
+![1.png](./screenshot/1.png)
 
 Hive is a data warehouse database for Hadoop, all database and table data files are stored at HDFS location /user/hive/warehouse by default.
 
