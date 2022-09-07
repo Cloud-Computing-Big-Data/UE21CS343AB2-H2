@@ -11,6 +11,7 @@ if [ $jps_count -lt 6 ]; then
     exit 1
 fi
 
+hdfs dfsadmin -safemode leave
 hdfs dfs -test -d /root/hive/warehouse
 if [ $? == 1 ]; then
     hdfs dfs -mkdir -p /root/hive/warehouse
