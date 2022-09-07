@@ -124,7 +124,7 @@ To check the partitions stored in Hadoop data warehouse, use the following comma
 
 ```bash
 hdfs dfs -ls /user/hive/warehouse/netflix_partition/type=Movie
-hdfs dfs -ls /user/hive/warehouse/netflix_partition/type=Tv\ Show
+hdfs dfs -ls /user/hive/warehouse/netflix_partition/type=TV\ Show
 ```
 
 **Take a screenshot of the terminal output and name it 2d.png**
