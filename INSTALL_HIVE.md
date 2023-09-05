@@ -3,7 +3,7 @@
 Clone the remote repository to your local machine by running the command below.
 
 ```bash
-git clone https://github.com/Cloud-Computing-Big-Data/UE20CS322-H2.git
+git clone https://github.com/Cloud-Computing-Big-Data/UE21CS343AB2-H2.git
 ```
 
 **ALL COMMANDS MUST BE RUN ONLY AFTER CLONING THE REPO AND FROM WITHIN THE LOCALLY CLONED FOLDER ONLY**
