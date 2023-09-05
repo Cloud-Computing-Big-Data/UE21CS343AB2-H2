@@ -335,31 +335,3 @@ Update item_cost of chips to 30. **Take a screenshot of the terminal output and 
 Delete all the rows with maximum item_cost. **Take a screenshot of the terminal output and name it 4b.png.**
 
 Write a query to find the total number of each item and check the number of mappers and reducers executed by that query. **Take a screenshot of the terminal output and name it 4c.png.**
-
-## TASK 4 - Evaluation
-
-This activity is graded and will be evaluated by two procedures. Both procedures are mandatory to be completed. **Deadline for this activity is 11:59pm on 7th September 2022.**
-
-### Procedure 1 - Auto-Graded Evaluation
-
-Run the following pyc file to evaluate your task. You can run this as many times until you get the right answer.
-
-For RR Campus Students:
-```bash
-python3 eval-rr.pyc
-```
-
-For EC Campus Students:
-```bash
-python3 eval-ec.pyc
-```
-
-**Take a screenshot of the terminal output and name it 5a.png.**
-
-### Procedure 2 - Google Form Evaluation
-
-Submit the PDF containing all the screenshots specified throughout the activity in the Google Form. The PDF should be named as (SRN).pdf
-
-Link for RR Campus Students: https://forms.gle/oWqAwrv1y2S62w7NA
-
-Link for EC Campus Students: https://forms.gle/ms6BzkKso1Ae4Uv67
